@@ -1,176 +1,208 @@
 #include <stdio.h>
 #include <string.h>
 
-int main() {
-    // Variaveis de utilidade
-    int userOption;
+typedef struct
+{
+    char state;
+    char code[5];
+    char name[50];
+    unsigned int population;
+    float area;
+    float pib;
+    int sights;
+    float populationDensity;  // Será calculado durante a criação
+    float pibCapita;          // Será calculado durante a criação
+    float points;             // Para acumular pontos das comparações
+} City;
 
-    // Dados da primeira carta
-
-    char state_1, code_1[5], city_1[50];
-    int sights_1;
-    float area_1, pib_1, pibCapita_1, populationDensity_1;
-    unsigned int populationAmount_1;
-
-    // Dados da segunda carta
-
-    char state_2, code_2[5], city_2[50];
-    int  sights_2;
-    float area_2, pib_2, pibCapita_2, populationDensity_2;
-    unsigned int populationAmount_2;
-
-    // Leitura dos dados - Cidade 01
+City createCity() {
+    City newCity;
 
     printf("Insira o estado da cidade: \n");
-    scanf("%c", &state_1);
-
+    scanf(" %c", &newCity.state);  // Note o espaço antes de %c - pular possiveis espaços em branco!
+    
     printf("Insira o código da cidade: \n");
-    scanf("%s", code_1);
-    getchar(); // Retira a quebra de linha do comando de leitura para que o próximo comando funcione corretamente, faça isso sempre que alternar entre leitura de chars, strings e numbers - float, int, double...
-
+    scanf("%s", newCity.code);
+    getchar(); // Limpar buffer
+    
     printf("Insira o nome da cidade: \n");
-    fgets(city_1, 49, stdin); // Faz a leitura do teclado(stdin), obecedendo o espaçamento e capturando todos os elementos corretamente
-    city_1[strcspn(city_1, "\n")] = 0; // Apaga a quebra de linha gerada pelo fgets, substituindo pelo 0.
-
+    fgets(newCity.name, 49, stdin);
+    newCity.name[strcspn(newCity.name, "\n")] = 0; // Remove quebra de linha
+    
     printf("Quantas pessoas vivem nessa cidade: \n");
-    scanf("%u", &populationAmount_1);
-
-    printf("Qual a area aproximada dessa cidade em quilometros quadrados: \n");
-    scanf("%f", &area_1);
-
+    scanf("%u", &newCity.population);
+    
+    printf("Qual a área aproximada dessa cidade em km²: \n");
+    scanf("%f", &newCity.area);
+    
     printf("Qual o valor aproximado do PIB dessa cidade: \n");
-    scanf("%f", &pib_1);
-
+    scanf("%f", &newCity.pib);
+    
     printf("Quantos pontos turísticos há nessa cidade: \n");
-    scanf("%i", &sights_1);
+    scanf("%d", &newCity.sights);
 
-    // Calculo dos dados complexos - Para não haver perda de dados em um calculo que envolve numeros inteiros e floats, recomenda-se o uso do casting explicito.
-    populationDensity_1 = (float) populationAmount_1 / area_1; // Densidade Populacional
+    // Calculando os dados derivados
+    newCity.populationDensity = (float)newCity.population / newCity.area;
+    newCity.pibCapita = newCity.pib / newCity.population;
+    newCity.points = 0.0; // Inicializar pontos com zero
 
-    pibCapita_1 = (float) pib_1 / populationAmount_1; // PIB per Capita
+    return newCity;
+}
 
-    getchar(); // Retira a quebra de linha do comando de leitura para que o próximo comando funcione corretamente, faça isso sempre que alternar entre leitura de chars, strings e numbers - float, int, double...
+// Fazendo uso do asterisco e de ponteiros para acessar os dados via referência
+// Caso contrário, a lógica de pontuação não funcionará devidamente
+// Pois a função trabalhará em cima de uma cópia dos dados
+void comparingCities(City *firstCity, City *secondCity, int attribute) {
+    printf("\n=== COMPARAÇÃO ===\n");
+    printf("%s VS %s\n", firstCity->name, secondCity->name);
 
-    // Leitura dos dados - Cidade 02
-
-    printf("Insira o estado da cidade: \n");
-    scanf("%c", &state_2);
-
-    printf("Insira o código da cidade: \n");
-    scanf("%s", code_2);
-    getchar(); // Retira a quebra de linha do comando de leitura para que o próximo comando funcione corretamente, faça isso sempre que alternar entre leitura de chars, strings e numbers - float, int, double...
-
-    printf("Insira o nome da cidade: \n");
-    fgets(city_2, 49, stdin); // Faz a leitura do teclado(stdin), obecedendo o espaçamento e capturando todos os elementos corretamente
-    city_2[strcspn(city_2, "\n")] = 0; // Apaga a quebra de linha gerada pelo fgets, substituindo pelo 0.
-
-    printf("Quantas pessoas vivem nessa cidade: \n");
-    scanf("%u", &populationAmount_2);
-
-    printf("Qual a area aproximada dessa cidade em quilometros quadrados: \n");
-    scanf("%f", &area_2);
-
-    printf("Qual o valor aproximado do PIB dessa cidade: \n");
-    scanf("%f", &pib_2);
-
-    printf("Quantos pontos turísticos há nessa cidade: \n");
-    scanf("%i", &sights_2);
-
-    // Calculo dos dados complexos - Para não haver perda de dados em um calculo que envolve numeros inteiros e floats, recomenda-se o uso do casting explicito.
-    populationDensity_2 = (float) populationAmount_2 / area_2; // Densidade Populacional
-
-    pibCapita_2 = (float) pib_2 / populationAmount_2; // PIB per Capita
-
-    // Fazendo a comparação
-
-    // Menu interativo
-    printf("Atributos comparaveis:\n");
-    printf("1 - População\n");
-    printf("2 - Area\n");
-    printf("3 - PIB\n");
-    printf("4 - Pontos Turisticos\n");
-    printf("5 - Densidade Demografica\n");
-    printf("Escolha o atributo que você deseja comparar.\n");
-    scanf("%d", &userOption);
-
-    printf("%s VS %s\n", city_1, city_2);
-
-    // Aplicando o switch para a escolha de caminhos alternativos de acordo com o atributo
-    switch (userOption)
+    switch (attribute)
     {
-    case 1:
-        printf("Atributo - População\n");
-        printf("%s possui %d pessoas.\n", city_1, populationAmount_1);
-        printf("%s possui %d pessoas.\n", city_2, populationAmount_2);
+    case 1: // População
+        printf("Atributo - População!\n");
 
-        if (populationAmount_1 > populationAmount_2) {
-            printf("Primeira cidade venceu! (%s)", city_1);
-        } else if (populationAmount_1 < populationAmount_2) {
-            printf("Segunda cidade venceu! (%s)", city_2);
+        if (firstCity->population > secondCity->population) {
+            printf("A cidade %s ganhou!\n", firstCity->name);
+            printf("A cidade %s possui um número maior de habitantes do que a cidade %s. %u VS %u\n", 
+                   firstCity->name, secondCity->name, firstCity->population, secondCity->population);
+        } else if(firstCity->population < secondCity->population) {
+            printf("A cidade %s ganhou!\n", secondCity->name);
+            printf("A cidade %s possui um número maior de habitantes do que a cidade %s. %u VS %u\n", 
+                   secondCity->name, firstCity->name, secondCity->population, firstCity->population);
         } else {
-            printf("Empate!");
+            printf("EMPATE!!!\n");
         }
+
+        firstCity->points += firstCity->population;
+        secondCity->points += secondCity->population;
 
         break;
-    case 2:
-        printf("Atributo - Area\n");
-        printf("%s possui uma area de %.2f.\n", city_1, area_1);
-        printf("%s possui uma area de %.2f.\n", city_2, area_2);
+    case 2: // Area
+        printf("Atributo - Área!\n");
 
-        if (area_1 > area_2) {
-            printf("Primeira cidade venceu! (%s)", city_1);
-        } else if (area_1 < area_2) {
-            printf("Segunda cidade venceu! (%s)", city_2);
+        if (firstCity->area > secondCity->area) {
+            printf("A cidade %s ganhou!\n", firstCity->name);
+            printf("A cidade %s possui uma área maior do que a cidade %s. %.2f km² VS %.2f km²\n", 
+                   firstCity->name, secondCity->name, firstCity->area, secondCity->area);
+        } else if(firstCity->area < secondCity->area) {
+            printf("A cidade %s ganhou!\n", secondCity->name);
+            printf("A cidade %s possui uma área maior do que a cidade %s. %.2f km² VS %.2f km²\n", 
+                   secondCity->name, firstCity->name, secondCity->area, firstCity->area);
         } else {
-            printf("Empate!");
+            printf("EMPATE!!!\n");
         }
+
+        firstCity->points += firstCity->area;
+        secondCity->points += secondCity->area;
 
         break;
-    case 3:
-        printf("Atributo - PIB\n");
-        printf("%s possui um PIB de %.2f.\n", city_1, pib_1);
-        printf("%s possui um PIB de %.2f.\n", city_2, pib_2);
+    case 3: // PIB
+        printf("Atributo - PIB!\n");
 
-        if (pib_1 > pib_2) {
-            printf("Primeira cidade venceu! (%s)", city_1);
-        } else if (pib_1 < pib_2) {
-            printf("Segunda cidade venceu! (%s)", city_2);
+        if (firstCity->pib > secondCity->pib) {
+            printf("A cidade %s ganhou!\n", firstCity->name);
+            printf("A cidade %s possui um PIB maior do que a cidade %s. %.2f VS %.2f\n", 
+                   firstCity->name, secondCity->name, firstCity->pib, secondCity->pib);
+        } else if(firstCity->pib < secondCity->pib) {
+            printf("A cidade %s ganhou!\n", secondCity->name);
+            printf("A cidade %s possui um PIB maior do que a cidade %s. %.2f VS %.2f\n", 
+                   secondCity->name, firstCity->name, secondCity->pib, firstCity->pib);
         } else {
-            printf("Empate!");
+            printf("EMPATE!!!\n");
         }
+
+        firstCity->points += firstCity->pib;
+        secondCity->points += secondCity->pib;
 
         break;
-    case 4:
-        printf("Atributo - Pontos Turisticos\n");
-        printf("%s tem um total de %d pontos turisticos.\n", city_1, sights_1);
-        printf("%s tem um total de %d pontos turisticos.\n", city_2, sights_2);
+    case 4: // Pontos Turisticos
+        printf("Atributo - Pontos Turísticos!\n");
 
-        if (sights_1 > sights_2) {
-            printf("Primeira cidade venceu! (%s)", city_1);
-        } else if (sights_1 < sights_2) {
-            printf("Segunda cidade venceu! (%s)", city_2);
+        if (firstCity->sights > secondCity->sights) {
+            printf("A cidade %s ganhou!\n", firstCity->name);
+            printf("A cidade %s possui mais pontos turísticos do que a cidade %s. %d VS %d\n", 
+                   firstCity->name, secondCity->name, firstCity->sights, secondCity->sights);
+        } else if(firstCity->sights < secondCity->sights) {
+            printf("A cidade %s ganhou!\n", secondCity->name);
+            printf("A cidade %s possui mais pontos turísticos do que a cidade %s. %d VS %d\n", 
+                   secondCity->name, firstCity->name, secondCity->sights, firstCity->sights);
         } else {
-            printf("Empate!");
+            printf("EMPATE!!!\n");
         }
+
+        firstCity->points += firstCity->sights;
+        secondCity->points += secondCity->sights;
 
         break;
-    case 5:
-        printf("Atributo - Densidade Populacional\n");
-        printf("%s tem uma densidade populacional de %.2f habitantes.\n", city_1, populationDensity_1);
-        printf("%s tem uma densidade populacional de %.2f habitantes.\n", city_2, populationDensity_2);
+    case 5: // Densidade Populacional - Menor ganha!
+        printf("Atributo - Densidade Populacional!\n");
 
-        if (populationDensity_1 > populationDensity_2) {
-            printf("Segunda cidade venceu! (%s)", city_2);
-        } else if (populationDensity_1 < populationDensity_2) {
-            printf("Primeira cidade venceu! (%s)", city_1);
+        if (firstCity->populationDensity < secondCity->populationDensity) {
+            printf("A cidade %s ganhou!\n", firstCity->name);
+            printf("A cidade %s possui menor densidade populacional do que a cidade %s. %.2f hab/km² VS %.2f hab/km²\n", 
+                   firstCity->name, secondCity->name, firstCity->populationDensity, secondCity->populationDensity);
+        } else if(firstCity->populationDensity > secondCity->populationDensity) {
+            printf("A cidade %s ganhou!\n", secondCity->name);
+            printf("A cidade %s possui menor densidade populacional do que a cidade %s. %.2f hab/km² VS %.2f hab/km²\n", 
+                   secondCity->name, firstCity->name, secondCity->populationDensity, firstCity->populationDensity);
         } else {
-            printf("Empate!");
+            printf("EMPATE!!!\n");
         }
+
+        // Para densidade, pontuamos o inverso (menor valor = mais pontos)
+        firstCity->points += (1.0 / firstCity->populationDensity) * 1000; 
+        secondCity->points += (1.0 / secondCity->populationDensity) * 1000;
 
         break;
     default:
-        printf("Opção inválida");
+        printf("Opção inválida, execute novamente o programa!\n");
         break;
+    }
+}
+
+int main() {
+    City firstCity = createCity();
+    City secondCity = createCity();
+    int attribute1, attribute2;
+
+    // Menu de atributos
+    printf("=== SUPER TRUNFO - CIDADES ===\n");
+    printf("Atributos disponíveis:\n");
+    printf("1 - População\n");
+    printf("2 - Área\n");
+    printf("3 - PIB\n");
+    printf("4 - Pontos Turísticos\n");
+    printf("5 - Densidade Populacional\n");
+
+    printf("\nEscolha o primeiro atributo: ");
+    scanf("%d", &attribute1);
+    
+    printf("Escolha o segundo atributo: ");
+    scanf("%d", &attribute2);
+
+    if (attribute1 == attribute2) {
+        printf("Erro ao comparar, você deve escolher atributos diferentes!\n");
+        return 1;
+    }
+
+    // Fazendo as comparações
+    printf("\n=== PRIMEIRA COMPARAÇÃO ===\n");
+    comparingCities(&firstCity, &secondCity, attribute1);
+    
+    printf("\n=== SEGUNDA COMPARAÇÃO ===\n");
+    comparingCities(&firstCity, &secondCity, attribute2);
+
+    // Comparação Final - Somatório!
+    printf("\n=== COMPARAÇÃO FINAL - SOMATORIA DE PONTOS ===\n");
+    printf("=== %s com um total de %.2f pontos === VS === %s com um total de %.2f pontos ===\n", 
+           firstCity.name, firstCity.points, secondCity.name, secondCity.points);
+    
+    if (firstCity.points > secondCity.points) {
+        printf("%s venceu o Super Trunfo!\n", firstCity.name);
+    } else if (firstCity.points < secondCity.points) {
+        printf("%s venceu o Super Trunfo!\n", secondCity.name);
+    } else {
+        printf("EMPATE TOTAL! Ambas as cidades têm %.2f pontos!\n", firstCity.points);
     }
 
     return 0;
